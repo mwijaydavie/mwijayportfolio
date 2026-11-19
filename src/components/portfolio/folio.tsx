@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDown,
-  ArrowDownRight,
-  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   AudioLines,
@@ -21,6 +19,7 @@ import "./portfolio.css";
 type Page = "home" | "work" | "about";
 const art = "/portfolio/";
 const scenes = [
+  { name: "Copper relief", file: "studio-relief.jpg" },
   { name: "Solar terrain", file: "rift.jpg" },
   { name: "Lunar tide", file: "tide.jpg" },
 ];
@@ -132,6 +131,7 @@ function Footer() {
         </div>
         <div className="ed-foot-base">
           <span>© 2026 Mwijay Davie</span>
+          <Link href="/login">Studio access</Link>
           <Link href="/about">About</Link>
           <a href="https://github.com/mwijay12">GitHub ↗</a>
           <a href="https://www.linkedin.com/in/mwijay-davie">LinkedIn ↗</a>
@@ -157,23 +157,29 @@ function Hero() {
   }, []);
   return (
     <section className="ed-hero">
-      <img
-        key={frame}
-        className="ed-landscape"
-        src={art + scenes[frame].file}
-        alt=""
-        fetchPriority="high"
-      />
+      {scenes.map((scene, i) => (
+        <img
+          key={scene.file}
+          className="ed-landscape"
+          data-active={frame === i}
+          src={art + scene.file}
+          alt=""
+          fetchPriority={i === 0 ? "high" : "low"}
+        />
+      ))}
       <div className="ed-shade" />
       <div className="ed-wrap ed-stage">
         <div className="ed-intro">
           <Kicker>
-            Independent portfolio <span>/</span> 2026
+            Studio portfolio <span>/</span> Edition 2026
           </Kicker>
           <h1>
-            Creative
-            <br />
-            <em>Technologist.</em>
+            <span className="ed-title-mask">
+              <span>Creative</span>
+            </span>{" "}
+            <span className="ed-title-mask">
+              <em>Technologist.</em>
+            </span>
           </h1>
           <p>
             I’m <strong>Mwijay Davie</strong>, co-founder of{" "}
@@ -194,24 +200,22 @@ function Hero() {
             +
           </span>
           <span aria-live="polite">
-            <small>Field study &nbsp;/&nbsp; 0{frame + 1}</small>
+            <small>Field study &nbsp;/&nbsp; 0{frame + 1} of 03</small>
             <b>{scenes[frame].name}</b>
           </span>
           <div>
-            <button
-              aria-label="Previous landscape"
-              onClick={() =>
-                setFrame((frame + scenes.length - 1) % scenes.length)
-              }
-            >
-              <ArrowLeft size={15} />
-            </button>
-            <button
-              aria-label="Next landscape"
-              onClick={() => setFrame((frame + 1) % scenes.length)}
-            >
-              <ArrowRight size={15} />
-            </button>
+            {scenes.map((scene, i) => (
+              <button
+                key={scene.file}
+                aria-label={`Show ${scene.name}`}
+                aria-pressed={frame === i}
+                onClick={() => setFrame(i)}
+                className="ed-frame"
+              >
+                <img src={art + scene.file} alt="" />
+                <span>0{i + 1}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -478,15 +482,27 @@ export function Folio({ page = "home" }: { page?: Page }) {
         const intro = root.current?.querySelector(
           ".ed-intro, .ed-bio-grid, .ed-subhero .ed-wrap",
         );
-        if (intro)
-          gsap.from(intro.children, {
-            y: 14,
-            opacity: 0.2,
-            duration: 0.55,
-            stagger: 0.055,
-            ease: "power2.out",
-            clearProps: "all",
+        if (!intro) return;
+        const lines = intro.querySelectorAll(".ed-title-mask > *");
+        const timeline = gsap.timeline({
+          defaults: { ease: "power3.out", clearProps: "transform,opacity" },
+        });
+        if (lines.length) {
+          timeline
+            .from(lines, { yPercent: 70, duration: 0.64, stagger: 0.075 }, 0)
+            .from(
+              intro.querySelectorAll(".ed-kicker, p, .ed-ctas"),
+              { y: 8, opacity: 0.3, stagger: 0.07, duration: 0.4 },
+              0.06,
+            );
+        } else {
+          timeline.from(intro.children, {
+            y: 10,
+            opacity: 0.4,
+            stagger: 0.05,
+            duration: 0.45,
           });
+        }
       },
       root,
     );

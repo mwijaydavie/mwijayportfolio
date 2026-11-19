@@ -7,7 +7,6 @@ import { isEditorialRoute } from '@/lib/folio-routes';
 import dynamic from 'next/dynamic';
 
 const PwaInstallPrompt = dynamic(() => import('@/components/pwa-install-prompt').then(m => m.PwaInstallPrompt), { ssr: false });
-const LoadingScreen = dynamic(() => import('@/components/ui/loading-screen').then(m => m.LoadingScreen), { ssr: false });
 
 interface FirebaseClientProviderProps {
   children: ReactNode;
@@ -55,7 +54,7 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
       auth={services?.auth}
       firestore={services?.firestore}
     >
-      {!isFolio && <><LoadingScreen /><PwaInstallPrompt /></>}
+      {!isFolio && pathname !== '/login' && !pathname.startsWith('/admin') && <PwaInstallPrompt />}
       {children}
     </FirebaseProvider>
   );
