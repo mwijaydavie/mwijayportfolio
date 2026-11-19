@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { isEditorialRoute } from '@/lib/folio-routes';
 import React from 'react';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll-provider';
 import ScrollProgress from '@/components/ui/scroll-progress';
@@ -28,7 +29,7 @@ export function ConditionalPublicLayout({ children }: { children: React.ReactNod
     pathname?.startsWith('/login') || 
     pathname?.startsWith('/client-portal');
 
-  if (isDashboardRoute || pathname === '/' || pathname === '/projects') {
+  if (isDashboardRoute || isEditorialRoute(pathname)) {
     return <>{children}</>;
   }
 
